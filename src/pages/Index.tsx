@@ -4,7 +4,7 @@ import { TradeHistory } from "@/components/dashboard/TradeHistory";
 import { RiskSettings } from "@/components/dashboard/RiskSettings";
 import { PositionOverview } from "@/components/dashboard/PositionOverview";
 import { mockFocusStock, mockTradeHistory, mockPositions, defaultRiskConfig } from "@/lib/mockData";
-import { Activity } from "lucide-react";
+
 
 const Index = () => {
   return (
