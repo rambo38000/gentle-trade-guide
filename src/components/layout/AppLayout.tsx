@@ -7,12 +7,18 @@ import {
   LayoutGrid,
   Eye,
   Bot,
+  Layers,
+  ClipboardList,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/", label: "Dashboard", icon: Activity, end: true },
+  { to: "/cards", label: "Active Trade Cards", icon: Layers },
   { to: "/journal", label: "Trade Journal", icon: NotebookPen },
+  { to: "/decisions", label: "Decision Log", icon: ClipboardList },
+  { to: "/stats", label: "Statistics", icon: BarChart3 },
   { to: "/lessons", label: "Lessons Learned", icon: BookOpen },
   { to: "/briefs", label: "Morning Briefs", icon: Sun },
   { to: "/patterns", label: "Pattern Library", icon: LayoutGrid },
