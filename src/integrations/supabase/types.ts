@@ -14,6 +14,127 @@ export type Database = {
   }
   public: {
     Tables: {
+      active_trade_cards: {
+        Row: {
+          created_at: string
+          entry_price: number | null
+          exit_criteria: string | null
+          hold_criteria: string | null
+          id: string
+          invalidation_level: string | null
+          overnight_allowed: boolean
+          status: string
+          stop_price: number | null
+          symbol: string
+          target_1: number | null
+          target_2: number | null
+          thesis: string | null
+          trade_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entry_price?: number | null
+          exit_criteria?: string | null
+          hold_criteria?: string | null
+          id?: string
+          invalidation_level?: string | null
+          overnight_allowed?: boolean
+          status?: string
+          stop_price?: number | null
+          symbol: string
+          target_1?: number | null
+          target_2?: number | null
+          thesis?: string | null
+          trade_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entry_price?: number | null
+          exit_criteria?: string | null
+          hold_criteria?: string | null
+          id?: string
+          invalidation_level?: string | null
+          overnight_allowed?: boolean
+          status?: string
+          stop_price?: number | null
+          symbol?: string
+          target_1?: number | null
+          target_2?: number | null
+          thesis?: string | null
+          trade_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      decision_log: {
+        Row: {
+          active_trade_card_id: string | null
+          confidence: number | null
+          created_at: string
+          decided_at: string
+          decision: string
+          id: string
+          lesson_id: string | null
+          outcome: string
+          reasoning: string | null
+          symbol: string
+          trade_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active_trade_card_id?: string | null
+          confidence?: number | null
+          created_at?: string
+          decided_at?: string
+          decision?: string
+          id?: string
+          lesson_id?: string | null
+          outcome?: string
+          reasoning?: string | null
+          symbol: string
+          trade_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active_trade_card_id?: string | null
+          confidence?: number | null
+          created_at?: string
+          decided_at?: string
+          decision?: string
+          id?: string
+          lesson_id?: string | null
+          outcome?: string
+          reasoning?: string | null
+          symbol?: string
+          trade_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decision_log_active_trade_card_id_fkey"
+            columns: ["active_trade_card_id"]
+            isOneToOne: false
+            referencedRelation: "active_trade_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "decision_log_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "decision_log_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lessons: {
         Row: {
           category: string
