@@ -11,6 +11,9 @@ import Briefs from "./pages/Briefs";
 import Patterns from "./pages/Patterns";
 import Watchlist from "./pages/Watchlist";
 import Agent from "./pages/Agent";
+import ActiveTradeCards from "./pages/ActiveTradeCards";
+import DecisionLog from "./pages/DecisionLog";
+import Statistics from "./pages/Statistics";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
