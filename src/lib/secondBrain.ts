@@ -13,6 +13,44 @@ export const TRADE_STATUSES = ["OPEN", "CLOSED", "CANCELLED"] as const;
 export const TRADE_SIDES = ["LONG", "SHORT"] as const;
 export const WATCHLIST_STATUSES = ["Active", "Watching", "Archived"] as const;
 
+export const CARD_TYPES = ["Day Trade", "Swing Trade"] as const;
+export const CARD_STATUSES = ["Planned", "Active", "Closed", "Cancelled"] as const;
+export const DECISIONS = ["BUY", "DO NOT BUY", "HOLD", "EXIT"] as const;
+export const OUTCOMES = ["Correct", "Incorrect", "Unknown"] as const;
+
+export interface ActiveTradeCard {
+  id: string;
+  symbol: string;
+  trade_type: string;
+  entry_price: number | null;
+  stop_price: number | null;
+  thesis: string | null;
+  invalidation_level: string | null;
+  target_1: number | null;
+  target_2: number | null;
+  hold_criteria: string | null;
+  exit_criteria: string | null;
+  overnight_allowed: boolean;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DecisionLogEntry {
+  id: string;
+  decided_at: string;
+  symbol: string;
+  decision: string;
+  confidence: number | null;
+  reasoning: string | null;
+  outcome: string;
+  trade_id: string | null;
+  active_trade_card_id: string | null;
+  lesson_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Trade {
   id: string;
   symbol: string;
