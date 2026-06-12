@@ -117,6 +117,23 @@ export default function Agent() {
         ))}
       </div>
 
+      <Card className="mb-4">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2"><BarChart3 className="h-4 w-4" /> Performance Snapshot</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+            <SnapStat label="Closed" value={stats.total.toString()} />
+            <SnapStat label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} />
+            <SnapStat label="Total P/L" value={`${stats.pnl >= 0 ? "+" : "-"}$${Math.abs(stats.pnl).toFixed(2)}`} tone={stats.pnl >= 0 ? "profit" : "loss"} />
+            <SnapStat label="Profit Factor" value={!isFinite(stats.pf) ? "∞" : stats.pf.toFixed(2)} />
+            <SnapStat label="Avg Win" value={`$${stats.avgWin.toFixed(2)}`} tone="profit" />
+            <SnapStat label="Avg Loss" value={`-$${stats.avgLoss.toFixed(2)}`} tone="loss" />
+            <SnapStat label="Expectancy" value={`${stats.expectancy >= 0 ? "+" : "-"}$${Math.abs(stats.expectancy).toFixed(2)}`} tone={stats.expectancy >= 0 ? "profit" : "loss"} />
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><ClipboardList className="h-4 w-4" /> Active Trade Cards</CardTitle></CardHeader>
