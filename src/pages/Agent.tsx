@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Bot, BookOpen, NotebookPen, Sun, LayoutGrid, Eye, ArrowRight, ClipboardList, GitBranch } from "lucide-react";
+import { Bot, BookOpen, NotebookPen, Sun, LayoutGrid, Eye, ArrowRight, ClipboardList, GitBranch, BarChart3 } from "lucide-react";
 import { Badge as _B } from "@/components/ui/badge";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ActiveTradeCard, DecisionLogEntry, Lesson, MorningBrief, Pattern, Trade, WatchlistEntry } from "@/lib/secondBrain";
@@ -12,6 +12,7 @@ export default function Agent() {
   const [counts, setCounts] = useState({ trades: 0, lessons: 0, briefs: 0, patterns: 0, watchlist: 0, cards: 0, decisions: 0 });
   const [recentLessons, setRecentLessons] = useState<Lesson[]>([]);
   const [recentTrades, setRecentTrades] = useState<Trade[]>([]);
+  const [allTrades, setAllTrades] = useState<Trade[]>([]);
   const [latestBrief, setLatestBrief] = useState<MorningBrief | null>(null);
   const [topPatterns, setTopPatterns] = useState<Pattern[]>([]);
   const [watchlist, setWatchlist] = useState<WatchlistEntry[]>([]);
@@ -20,7 +21,7 @@ export default function Agent() {
 
   useEffect(() => {
     (async () => {
-      const [trades, lessons, briefs, patterns, watch, cards, decisions] = await Promise.all([
+      const [trades, lessons, briefs, patterns, watch, cards, decisions, allTradesRes] = await Promise.all([
         supabase.from("trades").select("*", { count: "exact" }).order("trade_date", { ascending: false }).limit(5),
         supabase.from("lessons").select("*", { count: "exact" }).order("lesson_date", { ascending: false }).limit(5),
         supabase.from("morning_briefs").select("*", { count: "exact" }).order("brief_date", { ascending: false }).limit(1),
@@ -28,6 +29,7 @@ export default function Agent() {
         supabase.from("watchlist_entries").select("*", { count: "exact" }).eq("status", "Active").order("symbol").limit(10),
         (supabase as any).from("active_trade_cards").select("*", { count: "exact" }).in("status", ["Planned", "Active"]).order("updated_at", { ascending: false }).limit(6),
         (supabase as any).from("decision_log").select("*", { count: "exact" }).order("decided_at", { ascending: false }).limit(5),
+        supabase.from("trades").select("*"),
       ]);
       setCounts({
         trades: trades.count ?? 0,
@@ -45,8 +47,24 @@ export default function Agent() {
       setWatchlist((watch.data as WatchlistEntry[]) ?? []);
       setActiveCards((cards.data as ActiveTradeCard[]) ?? []);
       setRecentDecisions((decisions.data as DecisionLogEntry[]) ?? []);
+      setAllTrades((allTradesRes.data as Trade[]) ?? []);
     })();
   }, []);
+
+  const stats = useMemo(() => {
+    const closed = allTrades.filter(t => t.status === "CLOSED" && t.pnl !== null);
+    const wins = closed.filter(t => (t.pnl ?? 0) > 0);
+    const losses = closed.filter(t => (t.pnl ?? 0) < 0);
+    const winSum = wins.reduce((s, t) => s + (t.pnl ?? 0), 0);
+    const lossSum = Math.abs(losses.reduce((s, t) => s + (t.pnl ?? 0), 0));
+    const winRate = closed.length ? (wins.length / closed.length) * 100 : 0;
+    const pnl = winSum - lossSum;
+    const pf = lossSum > 0 ? winSum / lossSum : winSum > 0 ? Infinity : 0;
+    const avgWin = wins.length ? winSum / wins.length : 0;
+    const avgLoss = losses.length ? lossSum / losses.length : 0;
+    const expectancy = (winRate / 100) * avgWin - (1 - winRate / 100) * avgLoss;
+    return { total: closed.length, winRate, pnl, pf, avgWin, avgLoss, expectancy };
+  }, [allTrades]);
 
   const sources = [
     { to: "/cards", label: "Active Trade Cards", icon: ClipboardList, count: counts.cards, desc: "planned/active" },
@@ -56,6 +74,7 @@ export default function Agent() {
     { to: "/briefs", label: "Morning Briefs", icon: Sun, count: counts.briefs, desc: "briefs archived" },
     { to: "/patterns", label: "Pattern Library", icon: LayoutGrid, count: counts.patterns, desc: "patterns mapped" },
     { to: "/watchlist", label: "Watchlist Memory", icon: Eye, count: counts.watchlist, desc: "active symbols" },
+    { to: "/stats", label: "Statistics", icon: BarChart3, count: stats.total, desc: "closed trades" },
   ];
 
   return (
@@ -80,7 +99,7 @@ export default function Agent() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 mb-6">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 mb-6">
         {sources.map(s => (
           <Link key={s.to} to={s.to}>
             <Card className="card-hover h-full">
@@ -97,6 +116,23 @@ export default function Agent() {
           </Link>
         ))}
       </div>
+
+      <Card className="mb-4">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2"><BarChart3 className="h-4 w-4" /> Performance Snapshot</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+            <SnapStat label="Closed" value={stats.total.toString()} />
+            <SnapStat label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} />
+            <SnapStat label="Total P/L" value={`${stats.pnl >= 0 ? "+" : "-"}$${Math.abs(stats.pnl).toFixed(2)}`} tone={stats.pnl >= 0 ? "profit" : "loss"} />
+            <SnapStat label="Profit Factor" value={!isFinite(stats.pf) ? "∞" : stats.pf.toFixed(2)} />
+            <SnapStat label="Avg Win" value={`$${stats.avgWin.toFixed(2)}`} tone="profit" />
+            <SnapStat label="Avg Loss" value={`-$${stats.avgLoss.toFixed(2)}`} tone="loss" />
+            <SnapStat label="Expectancy" value={`${stats.expectancy >= 0 ? "+" : "-"}$${Math.abs(stats.expectancy).toFixed(2)}`} tone={stats.expectancy >= 0 ? "profit" : "loss"} />
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
@@ -215,6 +251,15 @@ export default function Agent() {
           </CardContent>
         </Card>
       </div>
+    </div>
+  );
+}
+
+function SnapStat({ label, value, tone }: { label: string; value: string; tone?: "profit" | "loss" }) {
+  return (
+    <div className="bg-secondary/40 rounded px-3 py-2">
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className={`font-mono text-sm font-semibold ${tone === "profit" ? "text-profit" : tone === "loss" ? "text-loss" : ""}`}>{value}</div>
     </div>
   );
 }
