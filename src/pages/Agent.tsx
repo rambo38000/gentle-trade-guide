@@ -12,6 +12,7 @@ export default function Agent() {
   const [counts, setCounts] = useState({ trades: 0, lessons: 0, briefs: 0, patterns: 0, watchlist: 0, cards: 0, decisions: 0 });
   const [recentLessons, setRecentLessons] = useState<Lesson[]>([]);
   const [recentTrades, setRecentTrades] = useState<Trade[]>([]);
+  const [allTrades, setAllTrades] = useState<Trade[]>([]);
   const [latestBrief, setLatestBrief] = useState<MorningBrief | null>(null);
   const [topPatterns, setTopPatterns] = useState<Pattern[]>([]);
   const [watchlist, setWatchlist] = useState<WatchlistEntry[]>([]);
