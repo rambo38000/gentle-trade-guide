@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Bot, BookOpen, NotebookPen, Sun, LayoutGrid, Eye, ArrowRight, ClipboardList, GitBranch } from "lucide-react";
+import { Bot, BookOpen, NotebookPen, Sun, LayoutGrid, Eye, ArrowRight, ClipboardList, GitBranch, BarChart3 } from "lucide-react";
 import { Badge as _B } from "@/components/ui/badge";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ActiveTradeCard, DecisionLogEntry, Lesson, MorningBrief, Pattern, Trade, WatchlistEntry } from "@/lib/secondBrain";
