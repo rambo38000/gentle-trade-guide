@@ -254,3 +254,12 @@ export default function Agent() {
     </div>
   );
 }
+
+function SnapStat({ label, value, tone }: { label: string; value: string; tone?: "profit" | "loss" }) {
+  return (
+    <div className="bg-secondary/40 rounded px-3 py-2">
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className={`font-mono text-sm font-semibold ${tone === "profit" ? "text-profit" : tone === "loss" ? "text-loss" : ""}`}>{value}</div>
+    </div>
+  );
+}
