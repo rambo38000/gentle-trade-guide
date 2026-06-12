@@ -21,7 +21,7 @@ export default function Agent() {
 
   useEffect(() => {
     (async () => {
-      const [trades, lessons, briefs, patterns, watch, cards, decisions] = await Promise.all([
+      const [trades, lessons, briefs, patterns, watch, cards, decisions, allTradesRes] = await Promise.all([
         supabase.from("trades").select("*", { count: "exact" }).order("trade_date", { ascending: false }).limit(5),
         supabase.from("lessons").select("*", { count: "exact" }).order("lesson_date", { ascending: false }).limit(5),
         supabase.from("morning_briefs").select("*", { count: "exact" }).order("brief_date", { ascending: false }).limit(1),
@@ -29,6 +29,7 @@ export default function Agent() {
         supabase.from("watchlist_entries").select("*", { count: "exact" }).eq("status", "Active").order("symbol").limit(10),
         (supabase as any).from("active_trade_cards").select("*", { count: "exact" }).in("status", ["Planned", "Active"]).order("updated_at", { ascending: false }).limit(6),
         (supabase as any).from("decision_log").select("*", { count: "exact" }).order("decided_at", { ascending: false }).limit(5),
+        supabase.from("trades").select("*"),
       ]);
       setCounts({
         trades: trades.count ?? 0,
@@ -46,8 +47,24 @@ export default function Agent() {
       setWatchlist((watch.data as WatchlistEntry[]) ?? []);
       setActiveCards((cards.data as ActiveTradeCard[]) ?? []);
       setRecentDecisions((decisions.data as DecisionLogEntry[]) ?? []);
+      setAllTrades((allTradesRes.data as Trade[]) ?? []);
     })();
   }, []);
+
+  const stats = useMemo(() => {
+    const closed = allTrades.filter(t => t.status === "CLOSED" && t.pnl !== null);
+    const wins = closed.filter(t => (t.pnl ?? 0) > 0);
+    const losses = closed.filter(t => (t.pnl ?? 0) < 0);
+    const winSum = wins.reduce((s, t) => s + (t.pnl ?? 0), 0);
+    const lossSum = Math.abs(losses.reduce((s, t) => s + (t.pnl ?? 0), 0));
+    const winRate = closed.length ? (wins.length / closed.length) * 100 : 0;
+    const pnl = winSum - lossSum;
+    const pf = lossSum > 0 ? winSum / lossSum : winSum > 0 ? Infinity : 0;
+    const avgWin = wins.length ? winSum / wins.length : 0;
+    const avgLoss = losses.length ? lossSum / losses.length : 0;
+    const expectancy = (winRate / 100) * avgWin - (1 - winRate / 100) * avgLoss;
+    return { total: closed.length, winRate, pnl, pf, avgWin, avgLoss, expectancy };
+  }, [allTrades]);
 
   const sources = [
     { to: "/cards", label: "Active Trade Cards", icon: ClipboardList, count: counts.cards, desc: "planned/active" },
