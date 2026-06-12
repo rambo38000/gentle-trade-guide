@@ -74,6 +74,7 @@ export default function Agent() {
     { to: "/briefs", label: "Morning Briefs", icon: Sun, count: counts.briefs, desc: "briefs archived" },
     { to: "/patterns", label: "Pattern Library", icon: LayoutGrid, count: counts.patterns, desc: "patterns mapped" },
     { to: "/watchlist", label: "Watchlist Memory", icon: Eye, count: counts.watchlist, desc: "active symbols" },
+    { to: "/statistics", label: "Statistics", icon: BarChart3, count: stats.total, desc: "closed trades" },
   ];
 
   return (
