@@ -3,26 +3,31 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Bot, BookOpen, NotebookPen, Sun, LayoutGrid, Eye, ArrowRight } from "lucide-react";
+import { Bot, BookOpen, NotebookPen, Sun, LayoutGrid, Eye, ArrowRight, ClipboardList, GitBranch } from "lucide-react";
+import { Badge as _B } from "@/components/ui/badge";
 import { PageHeader } from "@/components/common/PageHeader";
-import { Lesson, MorningBrief, Pattern, Trade, WatchlistEntry } from "@/lib/secondBrain";
+import { ActiveTradeCard, DecisionLogEntry, Lesson, MorningBrief, Pattern, Trade, WatchlistEntry } from "@/lib/secondBrain";
 
 export default function Agent() {
-  const [counts, setCounts] = useState({ trades: 0, lessons: 0, briefs: 0, patterns: 0, watchlist: 0 });
+  const [counts, setCounts] = useState({ trades: 0, lessons: 0, briefs: 0, patterns: 0, watchlist: 0, cards: 0, decisions: 0 });
   const [recentLessons, setRecentLessons] = useState<Lesson[]>([]);
   const [recentTrades, setRecentTrades] = useState<Trade[]>([]);
   const [latestBrief, setLatestBrief] = useState<MorningBrief | null>(null);
   const [topPatterns, setTopPatterns] = useState<Pattern[]>([]);
   const [watchlist, setWatchlist] = useState<WatchlistEntry[]>([]);
+  const [activeCards, setActiveCards] = useState<ActiveTradeCard[]>([]);
+  const [recentDecisions, setRecentDecisions] = useState<DecisionLogEntry[]>([]);
 
   useEffect(() => {
     (async () => {
-      const [trades, lessons, briefs, patterns, watch] = await Promise.all([
+      const [trades, lessons, briefs, patterns, watch, cards, decisions] = await Promise.all([
         supabase.from("trades").select("*", { count: "exact" }).order("trade_date", { ascending: false }).limit(5),
         supabase.from("lessons").select("*", { count: "exact" }).order("lesson_date", { ascending: false }).limit(5),
         supabase.from("morning_briefs").select("*", { count: "exact" }).order("brief_date", { ascending: false }).limit(1),
         supabase.from("patterns").select("*", { count: "exact" }).order("occurrences", { ascending: false }).limit(5),
         supabase.from("watchlist_entries").select("*", { count: "exact" }).eq("status", "Active").order("symbol").limit(10),
+        (supabase as any).from("active_trade_cards").select("*", { count: "exact" }).in("status", ["Planned", "Active"]).order("updated_at", { ascending: false }).limit(6),
+        (supabase as any).from("decision_log").select("*", { count: "exact" }).order("decided_at", { ascending: false }).limit(5),
       ]);
       setCounts({
         trades: trades.count ?? 0,
@@ -30,16 +35,22 @@ export default function Agent() {
         briefs: briefs.count ?? 0,
         patterns: patterns.count ?? 0,
         watchlist: watch.count ?? 0,
+        cards: cards.count ?? 0,
+        decisions: decisions.count ?? 0,
       });
       setRecentTrades((trades.data as Trade[]) ?? []);
       setRecentLessons((lessons.data as Lesson[]) ?? []);
       setLatestBrief(((briefs.data as MorningBrief[]) ?? [])[0] ?? null);
       setTopPatterns((patterns.data as Pattern[]) ?? []);
       setWatchlist((watch.data as WatchlistEntry[]) ?? []);
+      setActiveCards((cards.data as ActiveTradeCard[]) ?? []);
+      setRecentDecisions((decisions.data as DecisionLogEntry[]) ?? []);
     })();
   }, []);
 
   const sources = [
+    { to: "/cards", label: "Active Trade Cards", icon: ClipboardList, count: counts.cards, desc: "planned/active" },
+    { to: "/decisions", label: "Decision Log", icon: GitBranch, count: counts.decisions, desc: "decisions tracked" },
     { to: "/journal", label: "Trade Journal", icon: NotebookPen, count: counts.trades, desc: "trades logged" },
     { to: "/lessons", label: "Lessons Learned", icon: BookOpen, count: counts.lessons, desc: "lessons captured" },
     { to: "/briefs", label: "Morning Briefs", icon: Sun, count: counts.briefs, desc: "briefs archived" },
