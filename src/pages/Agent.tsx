@@ -73,14 +73,14 @@ export default function Agent() {
           <div className="text-sm">
             <p className="font-semibold mb-1">AI Agent Connection</p>
             <p className="text-muted-foreground">
-              Your OpenAI + Alpaca MCP agent can read and write any of the five Second Brain stores below via the backend API.
+              Your OpenAI + Alpaca MCP agent can read and write any of the Second Brain stores below via the backend API.
               Use this page to monitor what the agent sees and to keep its context fresh.
             </p>
           </div>
         </CardContent>
       </Card>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 mb-6">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 mb-6">
         {sources.map(s => (
           <Link key={s.to} to={s.to}>
             <Card className="card-hover h-full">
