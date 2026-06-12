@@ -100,6 +100,47 @@ export default function Agent() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><ClipboardList className="h-4 w-4" /> Active Trade Cards</CardTitle></CardHeader>
+          <CardContent className="space-y-2">
+            {activeCards.map(c => (
+              <div key={c.id} className="flex justify-between items-center text-sm border-b border-border pb-1.5 last:border-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono font-semibold">{c.symbol}</span>
+                  <Badge variant="outline" className="text-[10px]">{c.trade_type}</Badge>
+                </div>
+                <div className="flex items-center gap-3 text-xs font-mono text-muted-foreground">
+                  <span>E {c.entry_price ?? "—"}</span>
+                  <span className="text-loss">S {c.stop_price ?? "—"}</span>
+                  <Badge variant="secondary" className="text-[10px]">{c.status}</Badge>
+                </div>
+              </div>
+            ))}
+            {activeCards.length === 0 && <p className="text-xs text-muted-foreground">No planned or active cards.</p>}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><GitBranch className="h-4 w-4" /> Recent Decisions</CardTitle></CardHeader>
+          <CardContent className="space-y-2">
+            {recentDecisions.map(d => (
+              <div key={d.id} className="text-sm border-b border-border pb-1.5 last:border-0">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-semibold">{d.symbol}</span>
+                    <Badge variant="outline" className="text-[10px]">{d.decision}</Badge>
+                  </div>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {d.confidence !== null ? `${d.confidence}%` : "—"}
+                  </span>
+                </div>
+                {d.reasoning && <p className="text-xs text-muted-foreground line-clamp-1">{d.reasoning}</p>}
+              </div>
+            ))}
+            {recentDecisions.length === 0 && <p className="text-xs text-muted-foreground">No decisions logged.</p>}
+          </CardContent>
+        </Card>
+
+        <Card>
           <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><NotebookPen className="h-4 w-4" /> Recent Trades</CardTitle></CardHeader>
           <CardContent className="space-y-2">
             {recentTrades.map(t => (
