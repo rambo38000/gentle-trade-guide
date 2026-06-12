@@ -99,7 +99,7 @@ export default function Agent() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 mb-6">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 mb-6">
         {sources.map(s => (
           <Link key={s.to} to={s.to}>
             <Card className="card-hover h-full">
