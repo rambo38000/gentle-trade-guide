@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   Activity,
   BookOpen,
@@ -10,8 +10,11 @@ import {
   Layers,
   ClipboardList,
   BarChart3,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 
 const navItems = [
   { to: "/", label: "Dashboard", icon: Activity, end: true },
@@ -27,6 +30,14 @@ const navItems = [
 ];
 
 export default function AppLayout() {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth", { replace: true });
+  };
+
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       <aside className="hidden md:flex w-60 flex-col border-r border-sidebar-border bg-sidebar-background">
@@ -59,11 +70,20 @@ export default function AppLayout() {
             </NavLink>
           ))}
         </nav>
-        <div className="px-5 py-3 border-t border-sidebar-border">
-          <div className="flex items-center gap-2">
+        <div className="px-3 py-3 border-t border-sidebar-border space-y-2">
+          <div className="flex items-center gap-2 px-2">
             <span className="pulse-green inline-block h-2 w-2 rounded-full bg-profit" />
-            <span className="text-xs text-muted-foreground font-mono">Live</span>
+            <span className="text-xs text-muted-foreground font-mono truncate">{user?.email ?? "Live"}</span>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start text-muted-foreground hover:text-foreground"
+            onClick={handleSignOut}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign out
+          </Button>
         </div>
       </aside>
 
@@ -88,6 +108,13 @@ export default function AppLayout() {
               {item.label}
             </NavLink>
           ))}
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs whitespace-nowrap text-muted-foreground"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            Sign out
+          </button>
         </div>
       </div>
 
