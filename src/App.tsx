@@ -3,6 +3,8 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AppLayout from "./components/layout/AppLayout";
 import Index from "./pages/Index.tsx";
 import Lessons from "./pages/Lessons";
@@ -14,6 +16,7 @@ import Agent from "./pages/Agent";
 import ActiveTradeCards from "./pages/ActiveTradeCards";
 import DecisionLog from "./pages/DecisionLog";
 import Statistics from "./pages/Statistics";
+import AuthPage from "./pages/Auth";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -24,22 +27,26 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route element={<AppLayout />}>
-            <Route path="/" element={<Index />} />
-            <Route path="/cards" element={<ActiveTradeCards />} />
-            <Route path="/journal" element={<Journal />} />
-            <Route path="/decisions" element={<DecisionLog />} />
-            <Route path="/stats" element={<Statistics />} />
-            <Route path="/lessons" element={<Lessons />} />
-            <Route path="/briefs" element={<Briefs />} />
-            <Route path="/patterns" element={<Patterns />} />
-            <Route path="/watchlist" element={<Watchlist />} />
-            <Route path="/agent" element={<Agent />} />
-            <Route path="/agent" element={<Agent />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/auth" element={<AuthPage />} />
+            <Route element={<ProtectedRoute />}>
+              <Route element={<AppLayout />}>
+                <Route path="/" element={<Index />} />
+                <Route path="/cards" element={<ActiveTradeCards />} />
+                <Route path="/journal" element={<Journal />} />
+                <Route path="/decisions" element={<DecisionLog />} />
+                <Route path="/stats" element={<Statistics />} />
+                <Route path="/lessons" element={<Lessons />} />
+                <Route path="/briefs" element={<Briefs />} />
+                <Route path="/patterns" element={<Patterns />} />
+                <Route path="/watchlist" element={<Watchlist />} />
+                <Route path="/agent" element={<Agent />} />
+              </Route>
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
